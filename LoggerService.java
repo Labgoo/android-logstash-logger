@@ -53,6 +53,7 @@ public class LoggerService extends IntentService{
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        if (intent == null) return;
         String action = intent.getAction();
 
         if (action != null) {
@@ -115,17 +116,25 @@ public class LoggerService extends IntentService{
     private void writeLogToFile(String log) {
         String dateStr = dateFormat.format(new Date());
         String fileName = LOGSTASH_FILE_PREFIX + dateStr;
+        BufferedWriter bw = null;
         try {
             FileOutputStream outputStream = openFileOutput(fileName, Context.MODE_APPEND);
             DataOutputStream out = new DataOutputStream(outputStream);
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
+            bw = new BufferedWriter(new OutputStreamWriter(out));
             bw.write(log);
             bw.newLine();
-            bw.close();
         } catch (FileNotFoundException e) {
             Log.d(TAG, "couldn't write log:"+e.toString());
         } catch (IOException e) {
             Log.d(TAG, "couldn't write log:"+e.toString());
+        } finally {
+            if (bw != null) {
+                try {
+                    bw.close();
+                } catch (IOException e) {
+                    Log.d(TAG, "failed to close BufferedWriter:"+e.toString());
+                }
+            }
         }
     }
 
@@ -192,6 +201,14 @@ public class LoggerService extends IntentService{
             }
         } catch (IOException e) {
             Log.d(TAG, "couldn't send log to server:"+e.toString());
+        } finally {
+            try {
+                if (br != null) {
+                    br.close();
+                }
+            } catch (IOException e) {
+                Log.d(TAG, "Failed to close BufferedReader:"+e.toString());
+            }
         }
     }
 
