@@ -50,6 +50,36 @@ public class LoggerService extends IntentService{
         super.onCreate();
         setCleanupWakeAlarm(DAY);
     }
+	
+	/**
+     * Start this service to perform a writing action with the given parameters. If
+     * the service is already performing a task this action will be queued.*
+     *
+     * @param context
+     * @param log the log row to be written
+     */
+    public static void writeToFile(Context context, String log) {
+        Intent intent = new Intent(context, LoggerService.class);
+        intent.setAction(ACTION_LOG);
+        intent.putExtra(EXTRA_LOG, log);
+
+        context.startService(intent);
+    }
+
+    /**
+     * Start this service to change the way the service behaves. If
+     * the service is already performing a task this action will be queued.
+     *
+     * @param context
+     * @param newMode the new mode ordinal to be set
+     */
+    public static void changeMode(Context context, LogMod newMode) {
+        Intent intent = new Intent(context, LoggerService.class);
+        intent.setAction(ACTION_SET_MODE);
+        intent.putExtra(EXTRA_MODE, newMode.ordinal());
+
+        context.startService(intent);
+    }
 
     @Override
     protected void onHandleIntent(Intent intent) {
